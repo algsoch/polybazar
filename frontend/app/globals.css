@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inter Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-neutral-bg text-neutral-text font-sans antialiased;
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Primary CTA Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-5 py-3 
+           bg-primary text-white font-semibold 
+           rounded-button shadow-button
+           transition-all duration-200
+           hover:bg-primary-600 hover:shadow-lg
+           active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-5 py-3 
+           bg-white text-primary font-semibold 
+           border-2 border-primary rounded-button
+           transition-all duration-200
+           hover:bg-primary-50
+           active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 
+           text-neutral-text font-medium 
+           rounded-button
+           transition-all duration-200
+           hover:bg-neutral-bg
+           active:scale-[0.98];
+  }
+  
+  /* Card Component */
+  .card {
+    @apply bg-neutral-card rounded-card shadow-card 
+           transition-all duration-200
+           hover:shadow-card-hover;
+  }
+  
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 
+           text-tiny font-semibold rounded-badge;
+  }
+  
+  .badge-accent {
+    @apply badge bg-accent text-white;
+  }
+  
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700;
+  }
+  
+  .badge-neutral {
+    @apply badge bg-neutral-bg text-neutral-text;
+  }
+  
+  /* Input Fields */
+  .input {
+    @apply w-full px-4 py-3 
+           bg-white border border-neutral-border rounded-button
+           text-neutral-text placeholder:text-neutral-muted
+           transition-all duration-200
+           focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+  
+  /* Skeleton Loader */
+  .skeleton {
+    @apply bg-gradient-to-r from-neutral-bg via-white to-neutral-bg
+           bg-[length:400%_100%] animate-pulse;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.neutral.border') transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-neutral-border rounded-full;
+  }
+  
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent 
+           bg-gradient-to-r from-primary to-accent;
+  }
+  
+  /* Backdrop blur */
+  .backdrop-blur-nav {
+    @apply backdrop-blur-md bg-white/80;
+  }
+}
+
+/* Streaming text animation for chat */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing-animation {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 0.5s steps(20, end);
+}
+
+/* Token streaming cursor */
+.streaming-cursor::after {
+  content: '▋';
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

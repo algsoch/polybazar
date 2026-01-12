@@ -1,0 +1,44 @@
+# Development profile - runs without external dependencies
+
+spring:
+  # Ignore macOS extended attribute files  
+  classformat:
+    ignore: true
+  
+  # Disable JPA/PostgreSQL for now
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  
+  # MongoDB Configuration - use embedded if needed
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/polybazar_dev
+      auto-index-creation: true
+
+# JWT Settings for dev
+jwt:
+  secret: this_is_a_development_secret_key_that_is_at_least_32_characters
+  access-expiry: 900000
+  refresh-expiry: 1209600000
+
+# App Settings
+app:
+  ml-service:
+    url: http://localhost:8000
+  jwt:
+    refresh-expiration: 1209600000
+  cookie:
+    secure: false
+    same-site: Lax
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.polybazar: DEBUG

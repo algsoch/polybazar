@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # FRONTEND - Next.js
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - polybazar-network
+
+  # ============================================
+  # BACKEND - Spring Boot
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - MONGO_URI=mongodb://mongo:27017/polybazar
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/polybazar
+      - POSTGRES_USER=polybazar
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-polybazar_dev}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_key_must_be_at_least_32_characters}
+      - ML_SERVICE_URL=http://ml-services:8000
+      - REDIS_URL=redis://redis:6379
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-demo}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
+      - KYC_ENCRYPTION_KEY=${KYC_ENCRYPTION_KEY:-}
+    volumes:
+      - ./backend:/app
+      - backend-gradle-cache:/root/.gradle
+    depends_on:
+      - mongo
+      - postgres
+      - redis
+    networks:
+      - polybazar-network
+
+  # ============================================
+  # ML SERVICES - FastAPI
+  # ============================================
+  ml-services:
+    build:
+      context: ./ml-services
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/polybazar
+      - FAISS_INDEX_PATH=/app/data/faiss.index
+      - CHROMA_PATH=/app/data/chroma
+      - VECTOR_DB_TYPE=${VECTOR_DB_TYPE:-faiss}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-local}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MODEL_PATH=/app/models
+    volumes:
+      - ./ml-services:/app
+      - ml-models:/app/models
+      - ml-data:/app/data
+    networks:
+      - polybazar-network
+
+  # ============================================
+  # DATABASES
+  # ============================================
+  mongo:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./database/mongodb/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - polybazar-network
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=polybazar
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-polybazar_dev}
+      - POSTGRES_DB=polybazar
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - polybazar-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - polybazar-network
+
+  # ============================================
+  # DEVELOPMENT TOOLS
+  # ============================================
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/polybazar
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo
+    networks:
+      - polybazar-network
+    profiles:
+      - dev-tools
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@polybazar.com
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - polybazar-network
+    profiles:
+      - dev-tools
+
+networks:
+  polybazar-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  postgres-data:
+  redis-data:
+  pgadmin-data:
+  backend-gradle-cache:
+  ml-models:
+  ml-data:
