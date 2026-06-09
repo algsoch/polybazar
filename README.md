@@ -2,6 +2,8 @@
 
 AI-assisted B2B marketplace for polymer granules and plastic waste trading.
 
+Live frontend: https://polybazar-frontend.onrender.com
+
 ## Architecture
 
 ```mermaid
